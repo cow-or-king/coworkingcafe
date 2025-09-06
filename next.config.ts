@@ -7,15 +7,12 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['@/components/ui'],
   },
   
-  // Modularized imports pour réduire bundle size
-  modularizeImports: {
-    '@/components/ui': {
-      transform: '@/components/ui/{{member}}',
-    },
-    'lucide-react': {
-      transform: 'lucide-react/dist/esm/icons/{{member}}',
-    },
-  },
+  // Modularized imports temporairement désactivé - problème avec barrel exports
+  // modularizeImports: {
+  //   '@/components/ui': {
+  //     transform: '@/components/ui/{{member}}',
+  //   },
+  // },
   
   // Build configuration pour déploiement
   eslint: {

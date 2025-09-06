@@ -2,7 +2,13 @@
 
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from "lucide-react";
+import { 
+  AlertCircle, 
+  AlertTriangle, 
+  CheckCircle, 
+  Info, 
+  X 
+} from "@/lib/icons";
 import * as React from "react";
 
 export interface ToastProps {
@@ -49,13 +55,12 @@ const toastIcons = {
   info: Info,
 };
 
-function Toast({
-  id,
+const Toast = React.memo(({
   title,
   description,
   variant = "default",
   onClose,
-}: ToastProps) {
+}: Omit<ToastProps, 'id'>) => {
   const Icon = toastIcons[variant];
 
   return (
@@ -64,33 +69,40 @@ function Toast({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
       className={cn(
-        "group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md border p-4 shadow-lg transition-all hover:shadow-xl",
+        "group pointer-events-auto relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md border p-3 shadow-lg transition-all hover:shadow-xl sm:p-4",
         toastVariants[variant]
       )}
     >
       <div className="flex items-start space-x-2">
-        <Icon className="mt-0.5 h-4 w-4 flex-shrink-0" />
+        <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 sm:h-4 sm:w-4" />
         <div className="grid gap-1">
-          {title && <div className="text-sm font-semibold">{title}</div>}
+          {title && <div className="text-xs font-semibold sm:text-sm">{title}</div>}
           {description && (
-            <div className="text-sm opacity-90">{description}</div>
+            <div className="text-xs opacity-90 sm:text-sm">{description}</div>
           )}
         </div>
       </div>
       {onClose && (
         <button
           onClick={onClose}
-          className="text-foreground/50 hover:text-foreground absolute top-1 right-1 rounded-md p-1 opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus:ring-1 focus:outline-none"
+          className="text-foreground/50 hover:text-foreground absolute top-1 right-1 rounded-md p-1 opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus:ring-1 focus:outline-none touch:opacity-100"
+          aria-label="Fermer la notification"
         >
-          <X className="h-3 w-3" />
+          <X className="h-3 w-3 sm:h-3 sm:w-3" />
         </button>
       )}
     </motion.div>
   );
-}
+});
+
+Toast.displayName = 'Toast';
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<ToastProps[]>([]);
+
+  const dismiss = React.useCallback((id: string) => {
+    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
+  }, []);
 
   const toast = React.useCallback((newToast: Omit<ToastProps, "id">) => {
     const id = Math.random().toString(36).substring(7);
@@ -105,16 +117,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         dismiss(id);
       }, duration);
     }
-  }, []);
-
-  const dismiss = React.useCallback((id: string) => {
-    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
-  }, []);
+  }, [dismiss]);
 
   return (
     <ToastContext.Provider value={{ toasts, toast, dismiss }}>
       {children}
-      <div className="fixed right-0 bottom-0 z-50 flex max-w-[420px] flex-col-reverse p-4 sm:right-4 sm:bottom-4">
+      <div className="fixed right-0 bottom-0 z-50 flex w-full max-w-full flex-col-reverse p-2 sm:right-4 sm:bottom-4 sm:max-w-[420px] sm:p-4">
         <AnimatePresence mode="popLayout">
           {toasts.map((toast) => (
             <motion.div key={toast.id} layout className="mb-2">

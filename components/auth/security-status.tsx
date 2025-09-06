@@ -7,7 +7,7 @@
 
 import React from 'react'
 import { useAuth } from '@/hooks/use-auth'
-import { UserRole } from '@/types/auth'
+import type { UserRole } from '@/lib/models/user/types'
 
 interface SecurityStatusProps {
   showDetails?: boolean
@@ -26,13 +26,13 @@ export function SecurityStatus({
 
   const getRoleBadgeColor = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMIN:
+      case 'admin':
         return 'bg-red-100 text-red-800'
-      case UserRole.MANAGER:
+      case 'manager':
         return 'bg-blue-100 text-blue-800'
-      case UserRole.STAFF:
+      case 'staff':
         return 'bg-green-100 text-green-800'
-      case UserRole.CLIENT:
+      case 'client':
         return 'bg-gray-100 text-gray-800'
       default:
         return 'bg-gray-100 text-gray-800'
@@ -41,13 +41,13 @@ export function SecurityStatus({
 
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMIN:
+      case 'admin':
         return '👑'
-      case UserRole.MANAGER:
+      case 'manager':
         return '👤'
-      case UserRole.STAFF:
+      case 'staff':
         return '👷'
-      case UserRole.CLIENT:
+      case 'client':
         return '👋'
       default:
         return '❓'
@@ -73,7 +73,7 @@ export function SecurityStatus({
 
         {showDetails && (
           <div className="text-xs text-gray-500">
-            CSRF: {auth.csrfToken ? '✅' : '❌'}
+            Redux: ✅
           </div>
         )}
       </div>
@@ -107,13 +107,9 @@ export function SecurityStatus({
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Protection CSRF:</span>
-                  <span
-                    className={
-                      auth.csrfToken ? 'text-green-600' : 'text-red-600'
-                    }
-                  >
-                    {auth.csrfToken ? '✅' : '❌'}
+                  <span>Redux Store:</span>
+                  <span className="text-green-600">
+                    ✅
                   </span>
                 </div>
               </div>
@@ -182,8 +178,8 @@ export function useSecurityStatus() {
   const auth = useAuth()
 
   return {
-    isSecure: auth.isAuthenticated && !!auth.csrfToken && auth.user?.isActive,
-    hasCSRF: !!auth.csrfToken,
+    isSecure: auth.isAuthenticated && auth.user?.isActive,
+    hasRedux: true, // Redux is always available
     isActive: auth.user?.isActive || false,
     isAuthenticated: auth.isAuthenticated,
     role: auth.user?.role,

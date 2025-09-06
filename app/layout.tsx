@@ -2,6 +2,7 @@ import ConditionalFooter from "@/components/ConditionalFooter";
 import ConditionalNavigation from "@/components/ConditionalNavigation";
 import { CookieBanner } from "@/components/legal/CookieBanner";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { ReduxProvider } from "@/components/providers/redux-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import type { Metadata, Viewport } from "next";
@@ -41,16 +42,18 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={nunito.className}>
-        <ThemeProvider>
-          <AuthProvider>
-            <ToastProvider>
-              <ConditionalNavigation />
-              {children}
-              <ConditionalFooter />
-              <CookieBanner />
-            </ToastProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <ReduxProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <ToastProvider>
+                <ConditionalNavigation />
+                {children}
+                <ConditionalFooter />
+                <CookieBanner />
+              </ToastProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

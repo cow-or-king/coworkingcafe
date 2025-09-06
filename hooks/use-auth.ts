@@ -1,129 +1,174 @@
 /**
- * Hook d'authentification sécurisé pour les composants React
- * Fournit un accès facile et sécurisé aux données d'authentification
+ * Hook d'authentification sécurisé avec Redux/RTK Query
+ * Optimisé selon consigne.md pour performance et mobile-first
  */
 
 "use client";
 
-import {
-  getRedirectPath,
-  hasRole,
-  hasRouteAccess,
-} from "@/lib/auth-utils-client";
-import { UserRole } from "@/types/auth";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
-
-export interface AuthState {
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: UserRole;
-    permissions: string[];
-    isActive: boolean;
-  } | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  csrfToken: string | null;
-}
+import { 
+  useAppDispatch,
+  useCurrentUser,
+  useIsAuthenticated,
+  useAuthLoading,
+  useAuthError
+} from "./use-redux";
+import { 
+  useLoginMutation,
+  useRegisterMutation,
+  useLogoutMutation,
+  useGetCurrentUserQuery
+} from "@/lib/store";
+import { logout as logoutAction } from "@/lib/store";
+import type { UserRole } from "@/lib/models/user/types";
 
 export interface AuthActions {
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>;
+  logout: () => Promise<void>;
   hasRole: (requiredRole: UserRole) => boolean;
   hasPermission: (permission: string) => boolean;
-  hasRouteAccess: (pathname: string) => boolean;
   requireAuth: () => void;
   requireRole: (requiredRole: UserRole) => void;
   redirectToDashboard: () => void;
 }
 
-export function useAuth(): AuthState & AuthActions {
-  const { data: session, status } = useSession();
+// Utility functions moved from auth-utils-client
+const hasRoleUtil = (userRole: UserRole, requiredRole: UserRole): boolean => {
+  const hierarchy: Record<UserRole, UserRole[]> = {
+    admin: ['admin', 'manager', 'staff', 'client'],
+    manager: ['manager', 'staff', 'client'], 
+    staff: ['staff', 'client'],
+    client: ['client']
+  };
+  return hierarchy[userRole]?.includes(requiredRole) || false;
+};
+
+const getRedirectPath = (role: UserRole): string => {
+  switch (role) {
+    case 'admin': return '/dashboard/admin';
+    case 'manager': return '/dashboard/manager'; 
+    case 'staff': return '/dashboard/staff';
+    case 'client': return '/dashboard';
+    default: return '/dashboard';
+  }
+};
+
+export function useAuth() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  
+  // Redux state
+  const user = useCurrentUser();
+  const isAuthenticated = useIsAuthenticated();
+  const isLoading = useAuthLoading();
+  const error = useAuthError();
+  
+  // RTK Query mutations
+  const [loginMutation] = useLoginMutation();
+  const [registerMutation] = useRegisterMutation();
+  const [logoutMutation] = useLogoutMutation();
+  
+  // Auto-fetch current user on load (if needed)
+  useGetCurrentUserQuery(undefined, {
+    skip: !isAuthenticated || !!user,
+  });
 
-  // Memoize auth state for performance
-  const authState: AuthState = useMemo(
-    () => ({
-      user: session?.user
-        ? {
-            id: session.user.id,
-            email: session.user.email || "",
-            firstName: session.user.firstName || "",
-            lastName: session.user.lastName || "",
-            role: session.user.role,
-            permissions: session.user.permissions || [],
-            isActive: session.user.isActive,
-          }
-        : null,
-      isLoading: status === "loading",
-      isAuthenticated: status === "authenticated" && !!session?.user?.isActive,
-      csrfToken: session?.csrfToken || null,
-    }),
-    [session, status]
-  );
-
-  // Memoize auth actions to prevent unnecessary re-renders
-  const authActions: AuthActions = useMemo(
-    () => ({
-      hasRole: (requiredRole: UserRole) => {
-        if (!authState.user) return false;
-        return hasRole(authState.user.role, requiredRole);
-      },
-
-      hasPermission: (permission: string) => {
-        if (!authState.user) return false;
-        return authState.user.permissions.includes(permission);
-      },
-
-      hasRouteAccess: (pathname: string) => {
-        if (!authState.user) return false;
-        return hasRouteAccess(authState.user.role, pathname);
-      },
-
-      requireAuth: () => {
-        if (!authState.isAuthenticated) {
-          const currentUrl = window.location.pathname + window.location.search;
-          const loginUrl =
-            currentUrl !== "/login"
-              ? `/login?callbackUrl=${encodeURIComponent(currentUrl)}`
-              : "/login";
-          router.push(loginUrl);
+  // Memoized actions for performance
+  const authActions: AuthActions = useMemo(() => ({
+    login: async (email: string, password: string) => {
+      try {
+        const result = await loginMutation({ email, password }).unwrap();
+        if (result.success) {
+          // Token is automatically stored via Redux state
+          router.push(getRedirectPath(result.user.role));
         }
-      },
+      } catch {
+        throw new Error('Login failed');
+      }
+    },
 
-      requireRole: (requiredRole: UserRole) => {
-        if (!authState.isAuthenticated) {
-          const currentUrl = window.location.pathname + window.location.search;
-          const loginUrl = `/login?callbackUrl=${encodeURIComponent(
-            currentUrl
-          )}`;
-          router.push(loginUrl);
-          return;
+    register: async (firstName: string, lastName: string, email: string, password: string) => {
+      try {
+        const result = await registerMutation({ 
+          firstName,
+          lastName,
+          email, 
+          password
+        }).unwrap();
+        if (result.success) {
+          router.push(getRedirectPath(result.user.role));
         }
+      } catch (error) {
+        console.error('Registration error:', error);
+        throw new Error('Registration failed');
+      }
+    },
 
-        if (!authState.user || !hasRole(authState.user.role, requiredRole)) {
-          const redirectPath = authState.user
-            ? getRedirectPath(authState.user.role)
-            : "/login";
-          router.push(redirectPath);
-        }
-      },
+    logout: async () => {
+      try {
+        await logoutMutation().unwrap();
+        dispatch(logoutAction());
+        router.push('/login');
+      } catch {
+        // Logout locally even if server fails
+        dispatch(logoutAction());
+        router.push('/login');
+      }
+    },
 
-      redirectToDashboard: () => {
-        if (authState.user) {
-          const redirectPath = getRedirectPath(authState.user.role);
-          router.push(redirectPath);
-        } else {
-          router.push("/login");
-        }
-      },
-    }),
-    [authState, router]
-  );
+    hasRole: (requiredRole: UserRole) => {
+      if (!user) return false;
+      return hasRoleUtil(user.role, requiredRole);
+    },
 
-  return { ...authState, ...authActions };
+    hasPermission: (permission: string) => {
+      if (!user) return false;
+      return user.permissions.includes(permission);
+    },
+
+    requireAuth: () => {
+      if (!isAuthenticated) {
+        const currentUrl = window.location.pathname + window.location.search;
+        const loginUrl = currentUrl !== "/login" 
+          ? `/login?callbackUrl=${encodeURIComponent(currentUrl)}`
+          : "/login";
+        router.push(loginUrl);
+      }
+    },
+
+    requireRole: (requiredRole: UserRole) => {
+      if (!isAuthenticated) {
+        const currentUrl = window.location.pathname + window.location.search;
+        router.push(`/login?callbackUrl=${encodeURIComponent(currentUrl)}`);
+        return;
+      }
+
+      if (!user || !hasRoleUtil(user.role, requiredRole)) {
+        const redirectPath = user ? getRedirectPath(user.role) : "/login";
+        router.push(redirectPath);
+      }
+    },
+
+    redirectToDashboard: () => {
+      if (user) {
+        router.push(getRedirectPath(user.role));
+      } else {
+        router.push("/login");
+      }
+    },
+  }), [user, isAuthenticated, loginMutation, registerMutation, logoutMutation, dispatch, router]);
+
+  return {
+    // State
+    user,
+    isAuthenticated,
+    isLoading,
+    error,
+    // Actions
+    ...authActions
+  };
 }
 
 /**

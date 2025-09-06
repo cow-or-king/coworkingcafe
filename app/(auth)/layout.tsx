@@ -12,33 +12,32 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="from-coffee-light via-coffee-light/80 to-coffee-light/60 relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br px-4 py-8">
-      {/* Background decorative elements */}
+    <div className="from-coffee-light via-coffee-light/80 to-coffee-light/60 relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br px-4 py-8 sm:px-6 lg:px-8">
+      {/* Background decorative elements - Mobile first */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="bg-coffee-primary/10 absolute -top-40 -right-40 h-80 w-80 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-orange-200/20 blur-3xl"></div>
+        <div className="bg-coffee-primary/10 absolute -top-20 -right-20 h-40 w-40 rounded-full blur-3xl sm:-top-40 sm:-right-40 sm:h-80 sm:w-80"></div>
+        <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-orange-200/20 blur-3xl sm:-bottom-40 sm:-left-40 sm:h-80 sm:w-80"></div>
       </div>
-      <div className="relative z-10 w-full max-w-md space-y-6">
+      
+      <div className="relative z-10 w-full max-w-sm space-y-4 sm:max-w-md sm:space-y-6">
         {/* Logo/Brand */}
         <div className="text-center">
-          <Link href="/" className="group inline-block">
-            <div className="mb-2 flex items-center justify-center gap-3">
-              <div className="from-coffee-primary to-coffee-accent rounded-full bg-gradient-to-r p-3 transition-transform group-hover:scale-105">
+          <Link href="/" className="group inline-block min-h-[44px] min-w-[44px]">
+            <div className="mb-2 flex items-center justify-center gap-2 sm:gap-3">
+              <div className="from-coffee-primary to-coffee-accent rounded-full bg-gradient-to-r p-2 transition-transform group-hover:scale-105 sm:p-3">
                 <Image
                   src="/logo.svg"
-                  alt="Logo"
-                  width={40}
-                  height={40}
-                  className="h-20 w-20"
+                  alt="Logo Cow or King Café"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 sm:h-12 sm:w-12 lg:h-16 lg:w-16"
+                  priority
                 />
               </div>
             </div>
-            <div className="from-coffee-primary via-coffee-accent to-coffee-primary bg-gradient-to-r bg-clip-text text-3xl font-bold text-transparent">
+            <div className="from-coffee-primary via-coffee-accent to-coffee-primary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent sm:text-2xl lg:text-3xl">
               Cow or King Café
             </div>
-            {/* <p className="text-coffee-accent mt-1 text-sm">
-              Coworking à Strasbourg
-            </p> */}
           </Link>
         </div>
 
@@ -47,17 +46,20 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           {children}
         </Card>
 
-        {/* Footer */}
-        <div className="text-coffee-accent text-center text-sm">
+        {/* Footer - Mobile first links with proper touch targets */}
+        <div className="text-coffee-accent text-center text-xs sm:text-sm">
           <p>
             En continuant, vous acceptez nos{" "}
-            <Link href="/terms" className="hover:text-coffee-primary underline">
+            <Link 
+              href="/terms" 
+              className="hover:text-coffee-primary underline min-h-[44px] inline-flex items-center"
+            >
               conditions d&apos;utilisation
             </Link>{" "}
             et notre{" "}
             <Link
               href="/privacy"
-              className="hover:text-coffee-primary underline"
+              className="hover:text-coffee-primary underline min-h-[44px] inline-flex items-center"
             >
               politique de confidentialité
             </Link>

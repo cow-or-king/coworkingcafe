@@ -3,54 +3,30 @@
 // Force dynamic rendering pour useSearchParams
 export const dynamic = 'force-dynamic';
 
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-} from "@/components/ui";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { signIn } from "next-auth/react";
+// React/Next imports
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
-// Schema de validation Zod
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "L'email est requis")
-    .email("Veuillez entrer une adresse email valide"),
-  password: z
-    .string()
-    .min(1, "Le mot de passe est requis")
-    .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-});
+// Third-party libraries
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type LoginFormData = z.infer<typeof loginSchema>;
+// Internal absolute imports
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/components/ui/toast";
+import { AuthCard } from "@/components/organisms/auth-card";
+import { AuthFormField } from "@/components/molecules/auth-form-field";
+import { loginSchema, type LoginInput } from "@/lib/auth/validation";
+
+type LoginFormData = LoginInput;
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { login, isLoading } = useAuth();
+  const { toast } = useToast();
 
   // Récupérer le callbackUrl depuis les paramètres de l'URL
-  // Par défaut, rester sur la page d'accueil
   const callbackUrl = searchParams?.get("callbackUrl") || "/";
 
   const form = useForm<LoginFormData>({
@@ -62,150 +38,67 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        callbackUrl: callbackUrl,
-        redirect: false,
+      await login(data.email, data.password);
+      
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté",
+        variant: "success",
       });
 
-      if (result?.error) {
-        setError("Email ou mot de passe incorrect. Veuillez réessayer.");
-      } else if (result?.url) {
-        // NextAuth fournit une URL de redirection
-        window.location.href = result.url;
-      } else {
-        // Fallback: redirection manuelle
-        router.push(callbackUrl);
-      }
-    } catch (err: unknown) {
-      setError("Une erreur inattendue s'est produite. Veuillez réessayer.");
-    } finally {
-      setIsLoading(false);
+      router.push(callbackUrl);
+    } catch (error) {
+      toast({
+        title: "Erreur de connexion",
+        description: error instanceof Error ? error.message : "Email ou mot de passe incorrect",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <>
-      <CardHeader className="space-y-1 pb-4 text-center">
-        <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
-        <CardDescription>
-          Connectez-vous à votre compte pour accéder à votre espace
-        </CardDescription>
-      </CardHeader>
+    <AuthCard
+      title="Connexion"
+      description="Connectez-vous à votre compte pour accéder à votre espace"
+      form={form}
+      onSubmit={form.handleSubmit(onSubmit)}
+      submitLabel="Se connecter"
+      isLoading={isLoading}
+      alternativeAction={{
+        text: "Pas encore de compte ?",
+        linkText: "Créer un compte",
+        href: "/register"
+      }}
+    >
+      <AuthFormField
+        form={form}
+        name="email"
+        label="Email"
+        type="email"
+        placeholder="votre@email.com"
+        disabled={isLoading}
+        autoComplete="email"
+      />
 
-      <CardContent className="space-y-4">
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+      <AuthFormField
+        form={form}
+        name="password"
+        label="Mot de passe"
+        type="password"
+        placeholder="Votre mot de passe"
+        disabled={isLoading}
+        autoComplete="current-password"
+      />
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-700">Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="email"
-                      placeholder="votre@email.com"
-                      className="h-11"
-                      disabled={isLoading}
-                      autoComplete="email"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-700">Mot de passe</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        {...field}
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Votre mot de passe"
-                        className="h-11 pr-10"
-                        disabled={isLoading}
-                        autoComplete="current-password"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={isLoading}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="text-coffee-accent hover:text-coffee-primary h-4 w-4" />
-                        ) : (
-                          <Eye className="text-coffee-accent hover:text-coffee-primary h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex items-center justify-between text-sm">
-              <Link
-                href="/forgot-password"
-                className="text-coffee-accent hover:text-coffee-primary hover:underline"
-              >
-                Mot de passe oublié ?
-              </Link>
-            </div>
-
-            <Button type="submit" className="h-11 w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Connexion en cours...
-                </>
-              ) : (
-                "Se connecter"
-              )}
-            </Button>
-          </form>
-        </Form>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background text-muted-foreground px-2">Ou</span>
-          </div>
-        </div>
-
-        <div className="text-center text-sm">
-          <span className="text-gray-600">Pas encore de compte ? </span>
-          <Link
-            href="/register"
-            className="text-coffee-accent hover:text-coffee-primary font-medium hover:underline"
-          >
-            Créer un compte
-          </Link>
-        </div>
-      </CardContent>
-    </>
+      <div className="flex items-center justify-between text-sm">
+        <Link
+          href="/forgot-password"
+          className="text-coffee-accent hover:text-coffee-primary hover:underline min-h-[44px] inline-flex items-center"
+        >
+          Mot de passe oublié ?
+        </Link>
+      </div>
+    </AuthCard>
   );
 }
