@@ -1,5 +1,8 @@
 'use client'
 
+// Force dynamic rendering pour useSearchParams
+export const dynamic = 'force-dynamic';
+
 import {
   Alert,
   AlertDescription,

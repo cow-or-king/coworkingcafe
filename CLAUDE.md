@@ -5,13 +5,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ### Development
-- `pnpm dev` - Start development server with Turbopack
-- `pnpm build` - Build production application with Turbopack  
+- `pnpm dev` - Start development server with Turbopack (fast reload)
+- `pnpm build` - Build production application (stable, Northflank-ready)
+- `pnpm build:turbo` - Build with Turbopack (experimental, dev only)
 - `pnpm start` - Start production server
 - `pnpm lint` - Run ESLint
 
 ### Package Management
 This project uses pnpm with packageManager constraint set to "pnpm@10.10.0"
+
+### Deployment
+- **Northflank/Heroku Ready**: Uses `heroku-postbuild` script for automatic builds
+- **Standalone Output**: Configured with `output: 'standalone'` for containerized deployments
+- **Dynamic Rendering**: Auth pages force dynamic rendering (`export const dynamic = 'force-dynamic'`)
+- **Bundle Size**: ~102KB first load, individual pages 3-4KB (mobile-first optimized)
 
 ## Architecture & Structure
 

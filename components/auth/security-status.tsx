@@ -6,7 +6,7 @@
 'use client'
 
 import React from 'react'
-import { useAuth } from '@/lib/hooks/use-auth'
+import { useAuth } from '@/hooks/use-auth'
 import { UserRole } from '@/types/auth'
 
 interface SecurityStatusProps {

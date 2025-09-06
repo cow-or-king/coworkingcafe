@@ -3,6 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
+// Force dynamic rendering pour toutes les pages auth
+export const dynamic = 'force-dynamic';
+
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
