@@ -62,7 +62,7 @@ export default function Footer() {
       <div className="relative">
         {/* Main Footer Content */}
         <motion.div
-          className="mx-auto max-w-7xl px-4 py-16"
+          className="mx-auto w-full xl:max-w-7xl px-4 py-16"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -138,13 +138,13 @@ export default function Footer() {
             variants={itemVariants}
             className="from-coffee-primary/20 to-coffee-secondary/20 border-coffee-primary/30 mt-12 rounded-2xl border bg-linear-to-r p-8 backdrop-blur-sm"
           >
-            <div className="mx-auto max-w-2xl text-center">
-              <h3 className="mb-4 text-2xl font-bold">Restez informé</h3>
+            <div className="mx-auto w-full lg:max-w-2xl text-center">
+              <h3 className="mb-4 text-lg md:text-2xl font-bold">Restez informé</h3>
               <p className="mb-6 text-gray-300">
                 Recevez nos dernières actualités, nouveaux espaces et offres
                 exclusives
               </p>
-              <div className="mx-auto flex max-w-md flex-col gap-4 sm:flex-row">
+              <div className="mx-auto flex w-full sm:max-w-md flex-col gap-4 sm:flex-row">
                 <input
                   type="email"
                   placeholder="Votre email"
@@ -170,7 +170,7 @@ export default function Footer() {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          <div className="mx-auto max-w-7xl px-4 py-6">
+          <div className="mx-auto w-full xl:max-w-7xl px-4 py-6">
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
               <div className="flex items-center gap-2 text-gray-300">
                 <span>© 2024 Cow or King Café. Fait avec</span>

@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Logout error:', error);
+    // Handle logout error silently
     return NextResponse.json(
       {
         success: false,

@@ -9,7 +9,7 @@ interface SecurityEventData {
   ip: string
   userAgent: string
   success: boolean
-  details?: Record<string, any>
+  details?: Record<string, unknown>
 }
 
 interface SecurityEvent extends SecurityEventData {
@@ -73,7 +73,7 @@ export async function logSecurityEvent(eventData: SecurityEventData): Promise<vo
     
     await securityEvent.save()
   } catch (error) {
-    console.error('Failed to log security event:', error)
+    // Failed to log security event - handle silently
   }
 }
 
@@ -126,7 +126,7 @@ export async function checkBruteForce(ip: string): Promise<BruteForceCheck> {
       attempts: record.attempts
     }
   } catch (error) {
-    console.error('Error checking brute force:', error)
+    // Error checking brute force - default to safe state
     return {
       isBlocked: false,
       attempts: 0
@@ -166,7 +166,7 @@ export async function recordFailedLogin(ip: string): Promise<void> {
     
     await record.save()
   } catch (error) {
-    console.error('Error recording failed login:', error)
+    // Error recording failed login - handle silently
   }
 }
 
@@ -175,7 +175,7 @@ export async function resetLoginAttempts(ip: string): Promise<void> {
     await connectDB()
     await BruteForceModel.deleteOne({ ip })
   } catch (error) {
-    console.error('Error resetting login attempts:', error)
+    // Error resetting login attempts - handle silently
   }
 }
 
@@ -198,6 +198,6 @@ export async function cleanupOldSecurityEvents(): Promise<void> {
       blockedUntil: { $lt: new Date() }
     })
   } catch (error) {
-    console.error('Error cleaning up old security events:', error)
+    // Error cleaning up old security events - handle silently
   }
 }

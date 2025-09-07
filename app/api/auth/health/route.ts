@@ -32,7 +32,7 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('Auth health check error:', error);
+    // Handle auth health check error silently
 
     return NextResponse.json(
       {

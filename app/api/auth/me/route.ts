@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Get current user error:', error);
+    // Handle get current user error silently
     return NextResponse.json(
       {
         success: false,

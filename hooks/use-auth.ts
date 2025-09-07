@@ -25,7 +25,7 @@ import type { UserRole } from "@/lib/models/user/types";
 
 export interface AuthActions {
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>;
+  register: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   hasRole: (requiredRole: UserRole) => boolean;
   hasPermission: (permission: string) => boolean;
@@ -45,14 +45,18 @@ const hasRoleUtil = (userRole: UserRole, requiredRole: UserRole): boolean => {
   return hierarchy[userRole]?.includes(requiredRole) || false;
 };
 
-const getRedirectPath = (role: UserRole): string => {
-  switch (role) {
-    case 'admin': return '/dashboard/admin';
-    case 'manager': return '/dashboard/manager'; 
-    case 'staff': return '/dashboard/staff';
-    case 'client': return '/dashboard';
-    default: return '/dashboard';
-  }
+const getRedirectPath = (_role: UserRole): string => {
+  // Pour l'instant, tous les utilisateurs vont sur la page d'accueil
+  return '/';
+  
+  // Future logique de redirection basée sur le rôle (commentée)
+  // switch (role) {
+  //   case 'admin': return '/dashboard/admin';
+  //   case 'manager': return '/dashboard/manager'; 
+  //   case 'staff': return '/dashboard/staff';
+  //   case 'client': return '/dashboard';
+  //   default: return '/dashboard';
+  // }
 };
 
 export function useAuth() {
@@ -101,7 +105,7 @@ export function useAuth() {
           router.push(getRedirectPath(result.user.role));
         }
       } catch (error) {
-        console.error('Registration error:', error);
+        // Handle registration error silently
         throw new Error('Registration failed');
       }
     },

@@ -2,26 +2,36 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-/* Mobile optimizations */
-@media (max-width: 480px) {
+/* Mobile-first optimizations */
+.mobile-no-gradient {
+  background: theme("colors.coffee.light") !important;
+  background-image: none !important;
+}
+
+.mobile-simple-bg {
+  background: theme("colors.coffee.light/20") !important;
+  background-image: none !important;
+}
+
+@media (min-width: 481px) {
   .mobile-no-gradient {
-    background: theme("colors.coffee.light") !important;
-    background-image: none !important;
+    background: revert !important;
+    background-image: revert !important;
   }
 
   .mobile-simple-bg {
-    background: theme("colors.coffee.light/20") !important;
-    background-image: none !important;
+    background: revert !important;
+    background-image: revert !important;
   }
+}
 
-  .mobile-text-adjust {
-    font-size: 1rem;
-    line-height: 1.4;
-  }
+.mobile-text-adjust {
+  font-size: 1rem;
+  line-height: 1.4;
+}
 
-  .mobile-padding {
-    padding: 1rem !important;
-  }
+.mobile-padding {
+  padding: 1rem !important;
 }
 
 @theme {

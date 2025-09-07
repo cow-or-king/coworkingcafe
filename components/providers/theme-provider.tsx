@@ -42,7 +42,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   const toggleTheme = () => {
     // Ne fait rien - le thème est fixe
-    console.log('Theme toggle désactivé - thème café fixe')
+    // Theme toggle disabled - fixed café theme
   }
 
   return (

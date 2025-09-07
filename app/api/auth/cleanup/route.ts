@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     return response;
 
   } catch (error) {
-    console.error('Session cleanup error:', error);
+    // Handle session cleanup error silently
 
     await logSecurityEvent({
       userId: undefined,

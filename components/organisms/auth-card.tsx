@@ -5,6 +5,7 @@ import { ReactNode } from "react";
 import Link from "next/link";
 
 // Third-party libraries
+import { UseFormReturn } from "react-hook-form";
 import { Loader2 } from "@/lib/icons";
 
 // Internal absolute imports
@@ -30,7 +31,7 @@ interface AuthCardProps {
     linkText: string;
     href: string;
   };
-  form?: any; // UseFormReturn type générique
+  form?: UseFormReturn;
 }
 
 /**

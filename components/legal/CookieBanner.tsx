@@ -165,7 +165,7 @@ export function CookieBanner({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden"
+          className="relative w-full lg:max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden"
         >
           {!showSettings ? (
             /* Vue simplifiée */
@@ -227,7 +227,7 @@ export function CookieBanner({
             <div className="max-h-[80vh] overflow-y-auto">
               <div className="p-6 sm:p-8">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900">
+                  <h3 className="text-lg md:text-2xl font-bold text-gray-900">
                     Préférences des cookies
                   </h3>
                   <button
@@ -363,8 +363,8 @@ export function useCookiePreferences() {
     if (saved) {
       try {
         setPreferences(JSON.parse(saved))
-      } catch (error: unknown) {
-        console.error('Error parsing cookie preferences:', error)
+      } catch {
+        // Error parsing cookie preferences - use defaults
       }
     }
   }, [])

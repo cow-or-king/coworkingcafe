@@ -18,13 +18,9 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json();
-    console.log('Register API - Received body:', body);
-    
     const validationResult = registerSchema.safeParse(body);
-    console.log('Register API - Validation result:', validationResult);
     
     if (!validationResult.success) {
-      console.log('Register API - Validation errors:', validationResult.error.issues);
       return NextResponse.json(
         {
           success: false,
@@ -103,10 +99,10 @@ export async function POST(request: NextRequest) {
     );
 
   } catch (error) {
-    console.error('Registration error:', error);
+    // Handle registration error silently
     
     // Handle duplicate key error
-    if ((error as any).code === 11000) {
+    if ((error as { code?: number }).code === 11000) {
       return NextResponse.json(
         {
           success: false,

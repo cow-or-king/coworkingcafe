@@ -122,22 +122,25 @@ const createSocketConnection = async (session: {
   };
 }): Promise<Socket> => {
   if (globalSocket?.connected) {
-    console.log('🔄 Reusing existing Socket.IO connection')
+    // Reusing existing Socket.IO connection
     return globalSocket
   }
 
   if (connectionPromise) {
-    console.log('⏳ Waiting for existing connection attempt')
+    // Waiting for existing connection attempt
     return connectionPromise
   }
 
-  console.log('🚀 Creating new Socket.IO connection for user:', session.user.email)
+  // Creating new Socket.IO connection
+  if (process.env.NODE_ENV === 'development') {
+    // Debug info available in development only
+  }
 
   connectionPromise = new Promise<Socket>((resolve, reject) => {
     // Configuration pour développement - Socket.IO sur même port que l'app
     const socketUrl = window.location.origin
       
-    console.log('🔌 Connecting to Socket.IO server:', socketUrl)
+    // Connecting to Socket.IO server
     
     const socket = io(socketUrl, {
       path: '/api/socket/',
@@ -150,7 +153,7 @@ const createSocketConnection = async (session: {
     })
 
     const onConnect = () => {
-      console.log('✅ Socket.IO connected:', socket.id)
+      // Socket.IO connected
       
       // Authenticate immediately after connection
       socket.emit('authenticate', {
@@ -162,7 +165,7 @@ const createSocketConnection = async (session: {
     }
 
     const onAuthenticated = () => {
-      console.log('🔐 Socket.IO authenticated successfully')
+      // Socket.IO authenticated successfully
       globalSocket = socket
       connectionPromise = null
       socket.off('connect', onConnect)
@@ -172,7 +175,7 @@ const createSocketConnection = async (session: {
     }
 
     const onConnectError = (error: Error) => {
-      console.error('❌ Socket.IO connection error:', error)
+      // Handle connection error silently in production
       connectionPromise = null
       socket.off('connect', onConnect)
       socket.off('authenticated', onAuthenticated)
@@ -219,13 +222,13 @@ export function useMessaging(): UseMessagingReturn {
 
       // Set up event listeners
       socket.on('connect', () => {
-        console.log('🟢 Socket.IO connected')
+        // Socket.IO connected
         setIsConnected(true)
         setConnectionStatus('connected')
       })
 
       socket.on('disconnect', (reason) => {
-        console.log('🔴 Socket.IO disconnected:', reason)
+        // Socket.IO disconnected
         setIsConnected(false)
         setConnectionStatus('disconnected')
         setCurrentTypingUsers([])
@@ -239,7 +242,7 @@ export function useMessaging(): UseMessagingReturn {
         if (reason !== 'io server disconnect' && reason !== 'io client disconnect') {
           setTimeout(() => {
             if (!globalSocket?.connected) {
-              console.log('🔄 Attempting to reconnect...')
+              // Attempting to reconnect
               socket.connect()
             }
           }, 2000)
@@ -247,13 +250,13 @@ export function useMessaging(): UseMessagingReturn {
       })
 
       socket.on('connect_error', (error) => {
-        console.error('❌ Socket.IO connection error:', error)
+        // Handle connection error
         setConnectionStatus('error')
       })
 
       // Message events
       socket.on('new_message', (data: Message) => {
-        console.log('📨 New message received:', data._id)
+        // New message received
         setMessages(prev => {
           // Prevent duplicates
           const exists = prev.find(m => m._id === data._id)
@@ -264,7 +267,7 @@ export function useMessaging(): UseMessagingReturn {
       })
 
       socket.on('channel_history', (data: { channelId: string, messages: Message[], hasMore: boolean }) => {
-        console.log('📚 Channel history received:', data.messages.length, 'messages')
+        // Channel history received
         setMessages(data.messages)
       })
 
@@ -316,16 +319,14 @@ export function useMessaging(): UseMessagingReturn {
 
       socket.on('notification_increment', (data) => {
         // Handled by use-notifications hook
-        console.log('🔔 Notification increment:', data)
       })
 
       socket.on('notifications_read', (data) => {
         // Handled by use-notifications hook
-        console.log('👁️ Notifications read:', data)
       })
 
       socket.on('error', (data: { message: string }) => {
-        console.error('🚫 Socket.IO server error:', data.message)
+        // Handle server error silently
       })
 
       // Request initial data
@@ -335,7 +336,7 @@ export function useMessaging(): UseMessagingReturn {
       setConnectionStatus('connected')
 
     } catch (error: unknown) {
-      console.error('❌ Failed to initialize Socket.IO:', error)
+      // Failed to initialize Socket.IO - handle silently
       setConnectionStatus('error')
       isInitialized.current = false
     }
@@ -377,11 +378,11 @@ export function useMessaging(): UseMessagingReturn {
     size?: number;
   }> = []) => {
     if (!content.trim() || !socketRef.current?.connected) {
-      console.error('❌ Cannot send message: empty content or not connected')
+      // Cannot send message: empty content or not connected
       return
     }
 
-    console.log('📤 Sending message via Socket.IO')
+    // Sending message via Socket.IO
     socketRef.current.emit('send_message', {
       channelId,
       content: content.trim(),
@@ -391,21 +392,21 @@ export function useMessaging(): UseMessagingReturn {
   }, [])
 
   const loadMessages = useCallback((channelId: string) => {
-    console.log('📥 Loading messages for channel:', channelId)
+    // Loading messages for channel
     if (socketRef.current?.connected) {
       socketRef.current.emit('join_channel', { channelId })
     }
   }, [])
 
   const joinChannel = useCallback((channelId: string) => {
-    console.log('🚪 Joining channel:', channelId)
+    // Joining channel
     if (socketRef.current?.connected) {
       socketRef.current.emit('join_channel', { channelId })
     }
   }, [])
 
   const leaveChannel = useCallback((channelId: string) => {
-    console.log('🚪 Leaving channel:', channelId)
+    // Leaving channel
     if (socketRef.current?.connected) {
       socketRef.current.emit('leave_channel', { channelId })
     }
@@ -426,12 +427,12 @@ export function useMessaging(): UseMessagingReturn {
   const markMessagesAsRead = useCallback((channelId: string, messageIds: string[]) => {
     if (!messageIds.length || !socketRef.current?.connected) return
 
-    console.log('👁️ Marking messages as read:', messageIds.length)
+    // Marking messages as read
     socketRef.current.emit('mark_read', { channelId, messageIds })
   }, [])
 
   const reconnect = useCallback(() => {
-    console.log('🔄 Manual reconnection requested')
+    // Manual reconnection requested
     if (socketRef.current) {
       socketRef.current.connect()
     } else {
@@ -442,7 +443,7 @@ export function useMessaging(): UseMessagingReturn {
   }, [initializeConnection])
 
   const disconnect = useCallback(() => {
-    console.log('🔌 Manual disconnection requested')
+    // Manual disconnection requested
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current)
     }
@@ -465,11 +466,11 @@ export function useMessaging(): UseMessagingReturn {
 
   // Compatibility stubs
   const loadMoreMessages = useCallback(() => {
-    console.log('📄 Load more messages not yet implemented')
+    // Load more messages not yet implemented
   }, [])
 
   const createDirectMessage = useCallback(async (targetUserId: string) => {
-    console.log('💬 Creating DM via REST API')
+    // Creating DM via REST API
     
     try {
       const response = await fetch('/api/messaging/simple-create-channel', {
@@ -489,25 +490,25 @@ export function useMessaging(): UseMessagingReturn {
       const data = await response.json()
       
       if (data.success && data.channel) {
-        console.log('✅ DM created/retrieved:', data.channel._id)
+        // DM created/retrieved successfully
         return { id: data.channel._id.toString() }
       }
       
       throw new Error('Invalid API response')
       
     } catch (error: unknown) {
-      console.error('❌ Error creating DM:', error)
+      // Error creating DM - handle silently
       return null
     }
   }, [])
 
   const createChannel = useCallback(async () => {
-    console.log('🏗️ Create channel not implemented')
+    // Create channel not implemented
     return false
   }, [])
 
   const updateChannel = useCallback(() => {
-    console.log('✏️ Update channel not implemented')
+    // Update channel not implemented
   }, [])
 
   return {

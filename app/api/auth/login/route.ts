@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Login error:', error);
+    // Handle login error silently
     
     await logSecurityEvent({
       userId: undefined,

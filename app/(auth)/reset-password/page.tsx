@@ -143,7 +143,7 @@ export default function ResetPasswordPage() {
     return (
       <>
         <CardHeader className="space-y-1 pb-4 text-center">
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-lg md:text-2xl font-bold">
             Réinitialisation du mot de passe
           </CardTitle>
           <CardDescription>
@@ -164,7 +164,7 @@ export default function ResetPasswordPage() {
     return (
       <>
         <CardHeader className="space-y-1 pb-4 text-center">
-          <CardTitle className="text-2xl font-bold">Lien invalide</CardTitle>
+          <CardTitle className="text-lg md:text-2xl font-bold">Lien invalide</CardTitle>
           <CardDescription>
             Ce lien de réinitialisation n&apos;est pas valide
           </CardDescription>
@@ -202,7 +202,7 @@ export default function ResetPasswordPage() {
   return (
     <>
       <CardHeader className="space-y-1 pb-4 text-center">
-        <CardTitle className="text-2xl font-bold">
+        <CardTitle className="text-lg md:text-2xl font-bold">
           Nouveau mot de passe
         </CardTitle>
         <CardDescription>

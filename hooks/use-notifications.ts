@@ -28,18 +28,16 @@ export function useNotifications() {
     if (!session?.user?.id) return;
 
     try {
-      console.log(
-        "📊 Loading initial notification counts from API (one-time only)"
-      );
+      // Loading initial notification counts from API (one-time only)
       const response = await fetch("/api/messaging/notifications/counts");
       const data = await response.json();
 
       if (data.success) {
         setNotificationCounts(data.counts);
-        console.log("✅ Initial notification counts loaded:", data.counts);
+        // Initial notification counts loaded successfully
       }
     } catch (error: unknown) {
-      console.error("❌ Error loading initial notification counts:", error);
+      // Error loading initial notification counts - handle silently
     }
   }, [session?.user?.id]);
 
@@ -47,10 +45,10 @@ export function useNotifications() {
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    console.log("🔔 Setting up real-time Socket.IO notification listeners");
+    // Setting up real-time Socket.IO notification listeners
 
     const handleInitialNotificationCounts = (counts: NotificationCounts) => {
-      console.log("🔔 Initial notification counts received:", counts);
+      // Initial notification counts received
       setNotificationCounts(counts);
     };
 
@@ -59,7 +57,7 @@ export function useNotifications() {
       channelType: string;
       increment: number;
     }) => {
-      console.log("🔔 Notification increment received:", data);
+      // Notification increment received
       setNotificationCounts((prev) => {
         const newCounts = { ...prev };
 
@@ -82,12 +80,7 @@ export function useNotifications() {
 
         newCounts.totalUnread = newCounts.messagesDMs + newCounts.channels;
 
-        console.log("📊 Notification counts updated:", {
-          increment: data.increment,
-          channelId: data.channelId,
-          channelType: data.channelType,
-          newCounts,
-        });
+        // Notification counts updated
 
         return newCounts;
       });
@@ -97,14 +90,11 @@ export function useNotifications() {
       channelId: string;
       channelType: string;
     }) => {
-      console.log("👁️ Notifications read event received:", data);
+      // Notifications read event received
       setNotificationCounts((prev) => {
         const channelCount = prev.channelBreakdown[data.channelId] || 0;
         if (channelCount === 0) {
-          console.log(
-            "ℹ️ No notifications to clear for channel:",
-            data.channelId
-          );
+          // No notifications to clear for channel
           return prev;
         }
 
@@ -125,12 +115,7 @@ export function useNotifications() {
 
         newCounts.totalUnread = newCounts.messagesDMs + newCounts.channels;
 
-        console.log("📊 Notifications cleared:", {
-          channelId: data.channelId,
-          channelType: data.channelType,
-          clearedCount: channelCount,
-          newCounts,
-        });
+        // Notifications cleared successfully
 
         return newCounts;
       });
@@ -162,10 +147,10 @@ export function useNotifications() {
   // Mark channel as read function with real-time Socket.IO updates
   const markChannelAsRead = useCallback(
     (channelId: string, channelType?: string) => {
-      console.log("🔔 markChannelAsRead called:", { channelId, channelType });
+      // markChannelAsRead called
 
       if (!session?.user?.id) {
-        console.log("❌ Cannot mark channel as read: no user session");
+        // Cannot mark channel as read: no user session
         return;
       }
 
@@ -173,7 +158,7 @@ export function useNotifications() {
       setNotificationCounts((prev) => {
         const channelCount = prev.channelBreakdown[channelId] || 0;
         if (channelCount === 0) {
-          console.log("ℹ️ No unread messages in channel", channelId);
+          // No unread messages in channel
           return prev;
         }
 
@@ -192,11 +177,7 @@ export function useNotifications() {
 
         newCounts.totalUnread = newCounts.messagesDMs + newCounts.channels;
 
-        console.log("📊 Optimistic notification update:", {
-          channelId,
-          clearedCount: channelCount,
-          newCounts,
-        });
+        // Optimistic notification update
 
         return newCounts;
       });

@@ -13,12 +13,12 @@ export function useToast() {
       const message = `${title || (variant === 'destructive' ? 'Erreur' : 'Succès')}${description ? `: ${description}` : ''}`
 
       if (variant === 'destructive') {
-        console.error(message)
+        // Handle error toast silently
         if ('Notification' in window && Notification.permission === 'granted') {
           new Notification('Erreur', { body: description || title })
         }
       } else {
-        console.log(message)
+        // Handle success toast silently
         if ('Notification' in window && Notification.permission === 'granted') {
           new Notification('Succès', { body: description || title })
         }

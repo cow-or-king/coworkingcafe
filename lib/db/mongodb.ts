@@ -53,11 +53,11 @@ export async function connectDB(): Promise<typeof mongoose> {
 
   try {
     cached.conn = await cached.promise;
-    console.log('✅ MongoDB connected successfully');
+    // MongoDB connected successfully
     return cached.conn;
   } catch (error) {
     cached.promise = null; // Reset promise on error
-    console.error('❌ MongoDB connection error:', error);
+    // MongoDB connection error - re-throw for proper error handling
     throw error;
   }
 }

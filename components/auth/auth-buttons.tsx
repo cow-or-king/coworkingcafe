@@ -82,7 +82,7 @@ export default function AuthButtons({
         redirect: true,
       });
     } catch (error: unknown) {
-      console.error("Logout error:", error);
+      // Handle logout error silently
       setIsLoggingOut(false);
 
       toast({

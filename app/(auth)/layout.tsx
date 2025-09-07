@@ -19,7 +19,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-orange-200/20 blur-3xl sm:-bottom-40 sm:-left-40 sm:h-80 sm:w-80"></div>
       </div>
       
-      <div className="relative z-10 w-full max-w-sm space-y-4 sm:max-w-md sm:space-y-6">
+      <div className="relative z-10 w-full space-y-4 sm:max-w-md sm:space-y-6">
         {/* Logo/Brand */}
         <div className="text-center">
           <Link href="/" className="group inline-block min-h-[44px] min-w-[44px]">
